@@ -22,7 +22,7 @@ function Auth() {
   const handleUserLogin:IHandleUserLogin = (info) => {
     console.log(info);
   }
-
+ 
   return (
     <div style={{backgroundImage: `url(${ShapeImg.src})`}} className={`grid bg-zinc-950 grid-cols-2 w-full h-screen justify-center flex-col items-center`}>
 
