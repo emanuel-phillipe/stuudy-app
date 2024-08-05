@@ -1,12 +1,15 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useContext, useState, type Context } from 'react'
 import HomeButton from '../components/HomeButton'
 import { Plus, User } from '@phosphor-icons/react/dist/ssr'
 import Login from './components/Login'
 import Registro from './components/Registro'
 import ShapeImg from "../../public/Shapes.png"
 import ShapeImgWhite from "../../public/ShapesWhite.png"
+import axios from 'axios'
+import { AppContext } from '../context/context'
+import { redirect, useRouter } from 'next/navigation'
 
 interface IHandleUserLogin {
   (info: {
@@ -17,23 +20,32 @@ interface IHandleUserLogin {
 
 function Auth() {
 
+  const { push } = useRouter();
+  const {state, dispatch} = useContext(AppContext)
   const [page, setPage] = useState("login")
 
   const handleUserLogin:IHandleUserLogin = (info) => {
-    console.log(info);
+    const api_authenticate_user_url = process.env.NEXT_PUBLIC_API_URL + "/auth/login"
+    console.log(api_authenticate_user_url);
+    
+    axios.post(api_authenticate_user_url, info).then((response) => {
+      dispatch({type: "SET_TOKEN", payload: {data: response.data.token}})
+
+      push("/")
+    })
   }
  
   return (
     <div style={{backgroundImage: `url(${ShapeImg.src})`}} className={`grid bg-zinc-950 grid-cols-2 w-full h-screen justify-center flex-col items-center`}>
 
-      <div style={{backgroundImage: `url(${ShapeImgWhite.src})`}} className='bg-zinc-50 flex-col m-7 rounded-2xl h-[95%] flex items-center justify-center'>
+      <div style={{backgroundImage: `url(${ShapeImgWhite.src})`}} className='bg-zinc-50 flex-col m-6 rounded-2xl h-[95%] flex items-center justify-center'>
         <div>
           <div className='mb-10'>
             <h1 className='text-3xl font-bold'>Bem-vindo!</h1>
             <p className='text-zinc-500'>Insira as informações para continuar :)</p>
           </div>
           {
-            page==="login" && <Login loginFunction={handleUserLogin}/>
+            page==="login" && <Login loginFunction={(info) => handleUserLogin(info)}/>
           }
           { 
           page==="registro" && <Registro />

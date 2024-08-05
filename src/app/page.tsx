@@ -3,6 +3,9 @@
 import { Book, Calendar, Gear, List, Person, PersonSimple, User } from "@phosphor-icons/react/dist/ssr";
 import Subject from "./components/Subject";
 import HomeButton from "./components/HomeButton";
+import { useContext, useEffect } from "react";
+import { AppContext } from "./context/context";
+import { getCookie } from "cookies-next";
 
 const subjects = [
   {
@@ -20,10 +23,16 @@ const subjects = [
 ]
 
 export default function Home() {
+
+  const {state, dispatch} = useContext(AppContext)
+  useEffect(() => {
+    dispatch({type: "FETCH_INFO"})
+  })
+
   return (
     <main className="px-10 py-5 ">
       <div className="fixed w-full top-0 py-7 bg-white">
-        <h1 className="text-3xl font-bold">Bom dia, Emanuel!</h1>
+        <h1 className="text-3xl font-bold">Bom dia, {getCookie('user_token')}!</h1>
         <p className="text-zinc-500">Aqui está um resumo do seu currículo :)</p>
       </div>
 
