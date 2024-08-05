@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
-import { AppProvider } from "./context/context";
 
 const outfitFont = Outfit({ subsets: ["latin"] });
 
@@ -18,9 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <AppProvider>
         <body className={outfitFont.className}>{children}</body>
-      </AppProvider>
     </html>
   );
 }

@@ -1,65 +1,71 @@
 "use client"
 
-import { Book, Calendar, Gear, List, Person, PersonSimple, User } from "@phosphor-icons/react/dist/ssr";
+import { Book, Calendar, Gear, List, Person, PersonSimple, Plus, PlusCircle, User } from "@phosphor-icons/react/dist/ssr";
 import Subject from "./components/Subject";
 import HomeButton from "./components/HomeButton";
-import { useContext, useEffect } from "react";
-import { AppContext } from "./context/context";
 import { getCookie } from "cookies-next";
-
-const subjects = [
-  {
-    subjectName: "Ciências da Natureza",
-    maxPoints: 30,
-    components: ["Biologia", "Física", "Química"],
-    currentGrade: 6.3
-  },
-  {
-    subjectName: "Literatura Brasileira",
-    maxPoints: 30,
-    components: [],
-    currentGrade: 2.3
-  }
-]
+import React, { useEffect, useState } from "react";
+import { ActionType, initialState, reducer, type IAction, type IState } from "./context/context";
+import axios from "axios";
 
 export default function Home() {
+  const [state, dispatch] = React.useReducer<React.Reducer<IState, IAction>>(reducer, initialState);
+  const [infoFetched, setInfoFetched] = useState(false)
 
-  const {state, dispatch} = useContext(AppContext)
   useEffect(() => {
-    dispatch({type: "FETCH_INFO"})
-  })
 
+    if(infoFetched) return
+
+    const jwt_token = getCookie("user_token")
+    axios.get(process.env.NEXT_PUBLIC_API_URL + "/user/find", {headers: {
+      Authorization: "Bearer " + jwt_token
+    }}).then((response) => {
+      dispatch({type: ActionType.FetchInfo, payload: {data: response.data}})
+    })
+
+    axios.get(process.env.NEXT_PUBLIC_API_URL + "/subject/find", {headers: {
+      Authorization: "Bearer " + jwt_token
+    }}).then((response) => {
+      dispatch({type: ActionType.FetchSubjects, payload: {data: response.data}})
+
+      setInfoFetched(true)
+    })
+    
+  })
+  
   return (
     <main className="px-10 py-5 ">
       <div className="fixed w-full top-0 py-7 bg-white">
-        <h1 className="text-3xl font-bold">Bom dia, {getCookie('user_token')}!</h1>
+        <h1 className="text-3xl font-bold">Bom dia, {state.user_data?.name.split(" ")[0]}!</h1>
         <p className="text-zinc-500">Aqui está um resumo do seu currículo :)</p>
       </div>
 
-      <main className="mt-[6.5rem] mb-20">
+      <main className="mt-[6.5rem]">
 
-        <div className="flex gap-2 mb-10">
+        <div className="flex gap-2">
           <div>
-            <HomeButton icon={<Gear size={30} className="" />} title="Configurações" otherClass="h-[100%] flex-col items-center justify-center px-5"/>
+            <HomeButton icon={<Gear size={24} className="" />} title="Configurações" otherClass="h-[100%] flex-col items-center justify-center px-5"/>
           </div>
           <div className="flex flex-col gap-2">
-            <HomeButton icon={<User size={30} className="" />} title="Perfil"/>
-            <HomeButton icon={<List size={30} className="" />} title="Etapas"/>
+            <HomeButton icon={<User size={24} className="" />} title="Perfil"/>
+            <HomeButton icon={<List size={24} className="" />} title="Etapas"/>
           </div>
           <div>
-            <HomeButton icon={<Calendar size={30} className="" />} title="Calendário" otherClass="h-[100%] flex-col items-center justify-center px-10"/>
+            <HomeButton icon={<Calendar size={24} className="" />} title="Calendário" otherClass="h-[100%] flex-col items-center justify-center px-10"/>
           </div>
           <div className="flex flex-col gap-2">
-            <HomeButton icon={<Book size={30} className="" />} title="Lista de Tarefas"/>
-            <HomeButton icon={<Book size={30} className="" />} title="Lista de Tarefas"/>
+            <HomeButton icon={<Book size={24} className="" />} title="Lista de Tarefas"/>
+            <HomeButton icon={<PlusCircle size={24} className="" />} title="Nova Matéria"/>
           </div>
         </div>
 
+        <hr className="my-10"/>
+
         <div className="grid grid-cols-1 gap-2">
           {
-            subjects.map((currentSubject, index) => {
-              return (<Subject key={index} subjectName={currentSubject.subjectName} components={currentSubject.components} maxPoints={30} currentGrade={currentSubject.currentGrade}/>)
-            })
+            state.user_subjects ? state.user_subjects.map((currentSubject, index) => {
+              return (<Subject key={index} subjectName={currentSubject.name} components={currentSubject.components} maxPoints={currentSubject.total || 0} currentGrade={currentSubject.grade || 0}/>)
+            }) : ""
           }
         </div>
 

@@ -8,8 +8,8 @@ import Registro from './components/Registro'
 import ShapeImg from "../../public/Shapes.png"
 import ShapeImgWhite from "../../public/ShapesWhite.png"
 import axios from 'axios'
-import { AppContext } from '../context/context'
-import { redirect, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { ActionType, initialState, reducer, type IAction, type IState } from '../context/context'
 
 interface IHandleUserLogin {
   (info: {
@@ -20,17 +20,15 @@ interface IHandleUserLogin {
 
 function Auth() {
 
+  const [state, dispatch] = React.useReducer<React.Reducer<IState, IAction>>(reducer, initialState);
   const { push } = useRouter();
-  const {state, dispatch} = useContext(AppContext)
   const [page, setPage] = useState("login")
 
   const handleUserLogin:IHandleUserLogin = (info) => {
     const api_authenticate_user_url = process.env.NEXT_PUBLIC_API_URL + "/auth/login"
-    console.log(api_authenticate_user_url);
     
     axios.post(api_authenticate_user_url, info).then((response) => {
-      dispatch({type: "SET_TOKEN", payload: {data: response.data.token}})
-
+      dispatch({type: ActionType.SetKey, payload: {data: response.data.token}})
       push("/")
     })
   }

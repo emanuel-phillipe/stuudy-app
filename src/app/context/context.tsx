@@ -1,54 +1,59 @@
-"use client"
+import axios from "axios"
+import { getCookie, setCookie } from "cookies-next"
 
-import { setCookie } from "cookies-next";
-import { createContext, useReducer, type Dispatch, type ReactNode } from "react";
-
-interface IInitialState{
-  user_info: {}
+export enum ActionType {
+  FetchInfo = 'FETCH_INFO',
+  FetchSubjects = 'FETCH_SUBJECTS',
+  SetKey = 'SET_KEY',
 }
 
-const initialState:IInitialState = {
-  user_info: {}
+export interface IState {
+  user_data: {
+    id: string
+    name: string
+    email: string
+    password: string
+    slug: string
+  } | undefined
+  user_subjects: {
+    id: string
+    user_id: string
+    name: string
+    grade: number | null;
+    total: number | null;
+    slug: string;  
+    components: string[]
+  }[] | undefined
 }
 
-interface IReducerActions {
-  type: string;
-  payload?: {data: any};
+export interface IAction {
+  type: ActionType;
+  payload?: {
+    data: any; 
+  };
 }
 
-interface Props {
-  children?: ReactNode
-  // any props that come into the component
-}
+export const initialState: IState = {user_data: undefined, user_subjects: undefined};
 
-interface IAppContext {
-  state: IInitialState;
-  dispatch: React.Dispatch<IReducerActions>
-}
+export const reducer: React.Reducer<IState, IAction> = (state, action) => {
+  switch (action.type) {
+    case ActionType.FetchInfo:
+      return {
+        ...state,
+        user_data: action.payload?.data
+      }
+    case ActionType.SetKey:
 
-const appReducer = (state:IInitialState, action:IReducerActions) => {
-  
-  switch(action.type) {
-    case "SET_TOKEN":
+      setCookie("user_token", action.payload?.data)
 
-      if(action.payload) setCookie("user_token", action.payload.data)
+      return {...state}
+    case ActionType.FetchSubjects:
 
       return {
         ...state,
+        user_subjects: action.payload?.data
       }
-    case "FETCH_INFO":
-
-      
     default:
-      return state
+      throw new Error();
   }
-}
-
-export const AppContext = createContext<IAppContext>({state: initialState, dispatch: () => {}});
-
-export const AppProvider = ({ children }:Props) => {
-
-  const [state, dispatch] = useReducer(appReducer, initialState)
-
-  return <AppContext.Provider value={{state, dispatch}}>{children}</AppContext.Provider>
 }
