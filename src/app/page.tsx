@@ -32,7 +32,12 @@ export default function Home() {
     })
     
   })
-  
+
+  const selectSubject = (key:string) => {
+    dispatch({type: ActionType.SelectSubject, payload: {data: key}})
+
+  }
+
   return (
     <main className="px-10 py-5 ">
       <div className="fixed w-full top-0 py-7 bg-white">
@@ -64,7 +69,7 @@ export default function Home() {
         <div className="grid grid-cols-1 gap-2">
           {
             state.user_subjects ? state.user_subjects.map((currentSubject, index) => {
-              return (<Subject key={index} subjectName={currentSubject.name} components={currentSubject.components} maxPoints={currentSubject.total || 0} currentGrade={currentSubject.grade || 0}/>)
+              return (<Subject handleClick={() => {selectSubject(currentSubject.id)}} key={currentSubject.id} subjectName={currentSubject.name} components={currentSubject.components} maxPoints={currentSubject.total || 0} currentGrade={currentSubject.grade || 0}/>)
             }) : ""
           }
         </div>

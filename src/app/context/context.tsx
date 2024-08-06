@@ -1,10 +1,12 @@
 import axios from "axios"
 import { getCookie, setCookie } from "cookies-next"
+import { redirect, useRouter } from "next/navigation"
 
 export enum ActionType {
   FetchInfo = 'FETCH_INFO',
   FetchSubjects = 'FETCH_SUBJECTS',
   SetKey = 'SET_KEY',
+  SelectSubject = "SELECT_SUBJECT"
 }
 
 export interface IState {
@@ -24,6 +26,16 @@ export interface IState {
     slug: string;  
     components: string[]
   }[] | undefined
+  current_subject: {
+    id: string
+    user_id: string
+    name: string
+    grade: number | null;
+    total: number | null;
+    slug: string;  
+    components: string[]
+    activities: []
+  } | undefined
 }
 
 export interface IAction {
@@ -33,7 +45,8 @@ export interface IAction {
   };
 }
 
-export const initialState: IState = {user_data: undefined, user_subjects: undefined};
+export const initialState: IState = {user_data: undefined, user_subjects: undefined, current_subject: undefined};
+
 
 export const reducer: React.Reducer<IState, IAction> = (state, action) => {
   switch (action.type) {
@@ -53,6 +66,20 @@ export const reducer: React.Reducer<IState, IAction> = (state, action) => {
         ...state,
         user_subjects: action.payload?.data
       }
+    case ActionType.SelectSubject:
+      if(state.user_subjects){
+        const selected_subject = state.user_subjects.filter((subject) => {
+          return subject.id === action.payload?.data
+        })
+
+        const stateToFetch = {
+          ...state,
+          current_subject: selected_subject[0]
+        }        
+  
+        return stateToFetch
+      }
+      return
     default:
       throw new Error();
   }
