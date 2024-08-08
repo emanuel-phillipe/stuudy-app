@@ -25,6 +25,7 @@ export interface IState {
     total: number | null;
     slug: string;  
     components: string[]
+    activities?: []
   }[] | undefined
   current_subject: {
     id: string
@@ -34,7 +35,7 @@ export interface IState {
     total: number | null;
     slug: string;  
     components: string[]
-    activities: []
+    activities?: []
   } | undefined
 }
 
@@ -76,6 +77,8 @@ export const reducer: React.Reducer<IState, IAction> = (state, action) => {
           ...state,
           current_subject: selected_subject[0]
         }        
+
+        console.log(stateToFetch);
   
         return stateToFetch
       }

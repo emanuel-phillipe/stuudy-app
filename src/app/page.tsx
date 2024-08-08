@@ -7,10 +7,12 @@ import { getCookie } from "cookies-next";
 import React, { useEffect, useState } from "react";
 import { ActionType, initialState, reducer, type IAction, type IState } from "./context/context";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const [state, dispatch] = React.useReducer<React.Reducer<IState, IAction>>(reducer, initialState);
+  const [info, setInfo] = useState<IState>({user_data: undefined, user_subjects: undefined, current_subject: undefined})
   const [infoFetched, setInfoFetched] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
 
@@ -20,28 +22,29 @@ export default function Home() {
     axios.get(process.env.NEXT_PUBLIC_API_URL + "/user/find", {headers: {
       Authorization: "Bearer " + jwt_token
     }}).then((response) => {
-      dispatch({type: ActionType.FetchInfo, payload: {data: response.data}})
+      setInfo((current) => {return {
+        ...current,
+        user_data: response.data
+      }})
     })
 
     axios.get(process.env.NEXT_PUBLIC_API_URL + "/subject/find", {headers: {
       Authorization: "Bearer " + jwt_token
     }}).then((response) => {
-      dispatch({type: ActionType.FetchSubjects, payload: {data: response.data}})
+      setInfo((current) => {return {
+        ...current,
+        user_subjects: response.data
+      }})
 
       setInfoFetched(true)
     })
     
   })
 
-  const selectSubject = (key:string) => {
-    dispatch({type: ActionType.SelectSubject, payload: {data: key}})
-
-  }
-
   return (
     <main className="px-10 py-5 ">
       <div className="fixed w-full top-0 py-7 bg-white">
-        <h1 className="text-3xl font-bold">Bom dia, {state.user_data?.name.split(" ")[0]}!</h1>
+        <h1 className="text-3xl font-bold">Bom dia, {info.user_data?.name.split(" ")[0]}!</h1>
         <p className="text-zinc-500">Aqui está um resumo do seu currículo :)</p>
       </div>
 
@@ -68,8 +71,8 @@ export default function Home() {
 
         <div className="grid grid-cols-1 gap-2">
           {
-            state.user_subjects ? state.user_subjects.map((currentSubject, index) => {
-              return (<Subject handleClick={() => {selectSubject(currentSubject.id)}} key={currentSubject.id} subjectName={currentSubject.name} components={currentSubject.components} maxPoints={currentSubject.total || 0} currentGrade={currentSubject.grade || 0}/>)
+            info.user_subjects ?info.user_subjects.map((currentSubject, index) => {
+              return (<Subject info={info} id={currentSubject.id} handleClick={() => {console.log("teste")}} key={currentSubject.id} subjectName={currentSubject.name} components={currentSubject.components} maxPoints={currentSubject.total || 0} currentGrade={currentSubject.grade || 0}/>)
             }) : ""
           }
         </div>
